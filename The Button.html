@@ -1,0 +1,324 @@
+
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js">
+	<!--<![endif]-->
+
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<title>Keep Talking and Nobody Explodes v. 1</title>
+		<meta name="viewport" content="initial-scale=1">
+		<link rel="stylesheet" type="text/css" href="css/normalize.css">
+		<link rel="stylesheet" type="text/css" href="css/main.css">
+		<link href='https://fonts.googleapis.com/css?family=Special+Elite' rel='stylesheet' type='text/css'>
+		<link rel="apple-touch-icon-precomposed" href="apple-touch-icon-precomposed.png"> </head>
+		<style media="screen">
+			.striked {
+			  text-decoration: none;    /*we're replacing the default line-through*/
+			  position: relative;
+			  display: inline-block; /* don't wrap to multiple lines */
+			}
+			.striked:after {
+			  content:"";    /* required property */
+			  position: absolute;
+			  bottom: 0;
+			  left: 0;
+			  border-top: 2px solid red;
+			  height: calc(50% - 2px); /* 1px = half the line thickness */
+			  width: 100%;
+			}
+
+			.skip{
+				opacity: .2;
+			}
+
+			.interactive ul{
+				margin: 0;
+			}
+
+			.i-selected{
+				font-weight: bold;
+			}
+
+			.action{
+				cursor: pointer;
+				color: blue;
+     		text-decoration:underline;
+			}
+
+			.invisible{
+				visibility: hidden;
+			}
+
+			.active{
+				background-color: #dfd ;
+			}
+
+			#i-solution{
+				font-weight: bold;
+			}
+
+		</style>
+		<script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+		<script type="text/javascript">
+			function setup(){
+				var rules = $('ol li');
+				rules.each(function (index) {
+					$(this).attr("id", "rule"+(index+1));
+					$(this).addClass('rule');
+				});
+
+			}
+			// Cleanup information
+			function cleanup(){
+				// Line about 1 is useless
+				$('ul li:eq(1)').addClass('skip');
+
+				// Rule 5 can be done after 6 (independant) and is same result then 7
+				$("#rule5").addClass('skip');
+			};
+
+
+			var state = {};
+			var self = this
+
+			function resetInteractive(){
+				state = {};
+				$("#i-additional li").addClass('invisible');
+				$(".interactive").removeClass('hidden');
+				$(".interactive *").removeClass('i-selected');
+				applySelection();
+			}
+
+			function resetAdditional(){
+				$("#i-additional li").removeClass('i-selected');
+				state.bat2 = undefined;
+				state.bat3FRK = undefined;
+				state.car = undefined;
+			}
+
+			function applySelection(){
+				// Clear
+				$(".rule").removeClass('active');
+				$("#i-additional li").addClass('invisible');
+
+				if(!state.text || !state.color){
+					return;
+				}
+
+				var stop = false;
+
+				$("#i-solution").text("");
+				if(!stop && state.color == "blue" && state.text == "Abort"){
+					 //Match Rule #1
+					 $("#rule1").addClass('active');
+					 $("#i-solution").text("HOLD");
+					 stop = true;
+				}
+
+				if(!stop && state.text == "Detonate"){
+						$("#i-2bat").removeClass('invisible');
+						if(state.bat2 === undefined){
+							// Wait for Bat 2 Info
+							stop = true;
+						}else if(state.bat2 === true){
+							//Match Rule #2
+ 						 $("#rule2").addClass('active');
+ 						 $("#i-solution").text("PRESS");
+						 stop = true;
+						}
+				}
+
+				if(!stop && state.color == "white"){
+					$("#i-car").removeClass('invisible');
+					if(state.carOn === undefined){
+						// Wait for Bat 2 Info
+						stop = true;
+					}else if(state.carOn === true){
+						//Match Rule #3
+					  $("#rule3").addClass('active');
+					  $("#i-solution").text("HOLD");
+					  stop = true;
+					}
+				}
+
+				if(!stop){
+					$("#i-3bat").removeClass('invisible');
+					if(state.bat3FRK === undefined){
+						// Wait for Bat 2 Info
+						stop = true;
+
+						// Shortcut for 4 and 7 if 6 is false
+						if(state.color !== "red" || state.text !== "Hold"){
+							$("#rule4").addClass('active');
+							$("#rule7").addClass('active');
+							$("#i-solution").text("PRESS");
+						}
+					}else if(state.bat3FRK === true){
+						//Match Rule #4
+						$("#rule4").addClass('active');
+						$("#i-solution").text("PRESS");
+					  stop = true;
+					}
+				}
+
+				// 5 not Needed
+
+				if(!stop && state.color == "red" && state.text == "Hold"){
+					//Match Rule #6
+					$("#rule6").addClass('active');
+					$("#i-solution").text("PRESS");
+					stop = true;
+				}
+
+				if(!stop){
+					//Match Rule #6
+					$("#rule7").addClass('active');
+					$("#i-solution").text("PRESS");
+					stop = true;
+				}
+			}
+
+			function interactive(){
+				// Reset Button
+				$("#i-reset").addClass('action');
+				$("#i-reset").bind('click', function(){
+					resetInteractive();
+					return false;
+				}.bind(this));
+
+				// Color Pick
+				$("#i-color li").addClass('action');
+				$("#i-color li").bind('click', function(){
+					$("#i-color li").removeClass('i-selected');
+					$(this).addClass('i-selected');
+					state.color = $(this)[0].innerHTML;
+					resetAdditional();
+					applySelection();
+				});
+
+				// Text Pick
+				$("#i-text li").addClass('action');
+				$("#i-text li").bind('click', function(){
+					$("#i-text li").removeClass('i-selected');
+					$(this).addClass('i-selected');
+					state.text = $(this)[0].innerHTML;
+					resetAdditional();
+					applySelection();
+				});
+
+				// 2 Batteries Info
+				$("#i-2bat span").addClass('action');
+				$("#i-2bat span").bind('click', function(){
+					$("#i-2bat span").removeClass('i-selected');
+					$(this).addClass('i-selected');
+					state.bat2 = $(this)[0].innerHTML == "YES";
+					applySelection();
+				});
+
+				// 3 Batteries Info
+				$("#i-3bat span").addClass('action');
+				$("#i-3bat span").bind('click', function(){
+					$("#i-3bat span").removeClass('i-selected');
+					$(this).addClass('i-selected');
+					state.bat3FRK = $(this)[0].innerHTML == "YES";
+					applySelection();
+				});
+
+				// 2 Batteries Info
+				$("#i-car span").addClass('action');
+				$("#i-car span").bind('click', function(){
+					$("#i-car span").removeClass('i-selected');
+					$(this).addClass('i-selected');
+					state.carOn = $(this)[0].innerHTML == "YES";
+					applySelection();
+				});
+
+				resetInteractive();
+			}
+
+			$(function() {
+				setup();
+			  cleanup();
+				interactive();
+			});
+		</script>
+	<body>
+		<div id="ManualContent">
+			<div class="section">
+				<div class="section">
+					<div class="page">
+						<div class="page-header"> <span class="page-header-doc-title">Keep Talking and Nobody Explodes v. 1</span> <span class="page-header-section-title">The Button</span> </div>
+						<div class="page-footer absolute-footer"></div>
+						<div class="page-content"> <img src="img/Component/The Button.svg" class="diagram" />
+							<h2>On the Subject of The Button</h2>
+							<p class="flavour-text">You might think that a button telling you to press it is pretty straightforward. That’s the kind of thinking that gets people exploded.</p>
+							<p class="appendix-reference">See Appendix A for indicator identification reference.<br />See Appendix B for battery identification reference.</p>
+							<p>Follow these rules in the order they are listed. Perform the first action that applies:</p>
+							<ol>
+								<li>If the button is blue and the button says "Abort", hold the button and refer to "Releasing a Held Button".</li>
+								<li>If there is more than 1 battery on the bomb and the button says "Detonate", press and immediately release the button.</li>
+								<li>If the button is white and there is a lit indicator with label CAR, hold the button and refer to "Releasing a Held Button".</li>
+								<li>If there are more than 2 batteries on the bomb and there is a lit indicator with label FRK, press and immediately release the button.</li>
+								<li>If the button is yellow, hold the button and refer to "Releasing a Held Button".</li>
+								<li>If the button is red and the button says "Hold", press and immediately release the button.</li>
+								<li>If none of the above apply, hold the button and refer to "Releasing a Held Button".</li>
+							</ol>
+							<h3>Releasing a Held Button</h3>
+							<p>If you start holding the button down, a colored strip will light up on the right side of the module. Based on its color you must release the button at a specific point in time:</p>
+							<ul>
+								<li><em>Blue strip:</em> release when the countdown timer has a 4 in any position.</li>
+								<li><em>White strip:</em> release when the countdown timer has a 1 in any position.</li>
+								<li><em>Yellow strip:</em> release when the countdown timer has a 5 in any position.</li>
+								<li><em>Any other color strip:</em> release when the countdown timer has a 1 in any position.</li>
+							</ul>
+							<!-- Custom Interactive part Here -->
+							<div class="interactive hidden">
+								<h5>Interactive helper</h5>
+								<div style="display: flex;">
+									<div style="flex-grow:1">
+											<span>Pick a Color</span>
+											<ul id="i-color">
+												<li>blue</li>
+												<li>red</li>
+												<li>white</li>
+												<li>other</li>
+											</ul>
+									</div>
+									<div style="flex-grow:1">
+											<span>Pick a Text</span>
+											<ul id="i-text">
+												<li>Abort</li>
+												<li>Detonate</li>
+												<li>Hold</li>
+												<li>other</li>
+											</ul>
+
+									</div>
+									<div style="flex-grow:1">
+											<span>Additional Info</span>
+											<ul id="i-additional">
+												<li id='i-2bat'>> 1 Batteries <span>YES</span> | <span>NO</span></li>
+												<li id='i-car'>CAR Lit <span>YES</span> | <span>NO</span></li>
+												<li id='i-3bat'>> 2 Batteries &amp; FRK lit <span>YES</span> | <span>NO</span></li>
+											</ul>
+									</div>
+									<div style="flex-grow:1">
+											<span>Action</span>
+											<p id="i-solution"></p>
+											<p id="i-reset">Reset</p>
+									</div>
+								</div>
+							</div>
+							<!-- End of Interactive -->
+						</div>
+						<div class="page-footer relative-footer">Page 1 of 1</div>
+					</div>
+				</div>
+			</div>
+	</body>
+</html>
