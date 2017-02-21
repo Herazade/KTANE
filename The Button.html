@@ -17,12 +17,6 @@
     <link href='https://fonts.googleapis.com/css?family=Special+Elite' rel='stylesheet' type='text/css'>
     <link rel="apple-touch-icon-precomposed" href="apple-touch-icon-precomposed.png"> </head>
     <style>
-      @media print {
-        .interactive{
-          display:none;
-        }
-      }
-
       .icon::before{
         content: "";
         width: 20px;
@@ -43,49 +37,8 @@
         background-size: contain;
       }
 
-      .striked {
-        text-decoration: none;    /*we're replacing the default line-through*/
-        position: relative;
-        display: inline-block; /* don't wrap to multiple lines */
-      }
-      .striked:after {
-        content:"";    /* required property */
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        border-top: 2px solid red;
-        height: calc(50% - 2px); /* 1px = half the line thickness */
-        width: 100%;
-      }
-
       .skip{
-        opacity: .2;
-      }
-
-      .interactive ul{
-        margin: 0;
-      }
-
-      .i-selected{
-        font-weight: bold;
-      }
-
-      .action{
-        cursor: pointer;
-        color: blue;
-         text-decoration:underline;
-      }
-
-      .invisible{
-        visibility: hidden;
-      }
-
-      .active{
-        background-color: #dfd ;
-      }
-
-      #i-solution{
-        font-weight: bold;
+        opacity: .3;
       }
 
       .key{
@@ -105,7 +58,7 @@
 
       }
 
-      function addColorToText(elt, word, css){
+      function addStyleToText(elt, word, css){
         var exp = new RegExp("("+word+")", 'gi')
         $(elt).html($(elt).html().replace(exp,'<span class="'+css+'">$1</span>'));
       }
@@ -119,193 +72,33 @@
         $("#rule5").addClass('skip');
 
         // Add evidence and color to rules
-        addColorToText("#rule1", 'Blue', 'key blue');
-        addColorToText("#rule1", 'Abort', 'key');
+        addStyleToText("#rule1", 'Blue', 'key blue');
+        addStyleToText("#rule1", 'Abort', 'key');
         $("#rule1").addClass("icon hold");
 
-        addColorToText("#rule2", 'more than 1 battery', 'key');
-        addColorToText("#rule2", 'Detonate', 'key');
+        addStyleToText("#rule2", 'more than 1 battery', 'key');
+        addStyleToText("#rule2", 'Detonate', 'key');
         $("#rule2").addClass("icon press");
 
-        addColorToText("#rule3", 'white', 'key white');
-        addColorToText("#rule3", 'CAR  ', 'key');
+        addStyleToText("#rule3", 'white', 'key white');
+        addStyleToText("#rule3", 'CAR  ', 'key');
         $("#rule3").addClass("icon hold");
 
-        addColorToText("#rule4", 'more than 2 batteries', 'key');
-        addColorToText("#rule4", 'FRK', 'key');
+        addStyleToText("#rule4", 'more than 2 batteries', 'key');
+        addStyleToText("#rule4", 'FRK', 'key');
         $("#rule4").addClass("icon press");
 
         $("#rule5").addClass("icon hold");
 
-        addColorToText("#rule6", 'red', 'key red');
-        addColorToText("#rule6", 'Hold', 'key');
+        addStyleToText("#rule6", 'red', 'key red');
+        addStyleToText("#rule6", 'Hold', 'key');
         $("#rule6").addClass("icon press");
         $("#rule7").addClass("icon hold");
       };
 
-
-      var state = {};
-      var self = this
-
-      function resetInteractive(){
-        state = {};
-        $("#i-additional li").addClass('invisible');
-        $(".interactive").removeClass('hidden');
-        $(".interactive *").removeClass('i-selected');
-        applySelection();
-      }
-
-      function resetAdditional(){
-        $("#i-additional li").removeClass('i-selected');
-        state.bat2 = undefined;
-        state.bat3FRK = undefined;
-        state.car = undefined;
-      }
-
-      function applySelection(){
-        // Clear
-        $(".rule").removeClass('active');
-        $("#i-additional li").addClass('invisible');
-
-        if(!state.text || !state.color){
-          return;
-        }
-
-        var stop = false;
-
-        $("#i-solution").text("");
-        if(!stop && state.color == "blue" && state.text == "Abort"){
-           //Match Rule #1
-           $("#rule1").addClass('active');
-           $("#i-solution").text("HOLD");
-           stop = true;
-        }
-
-        if(!stop && state.text == "Detonate"){
-            $("#i-2bat").removeClass('invisible');
-            if(state.bat2 === undefined){
-              // Wait for Bat 2 Info
-              stop = true;
-            }else if(state.bat2 === true){
-              //Match Rule #2
-              $("#rule2").addClass('active');
-              $("#i-solution").text("PRESS");
-             stop = true;
-            }
-        }
-
-        if(!stop && state.color == "white"){
-          $("#i-car").removeClass('invisible');
-          if(state.carOn === undefined){
-            // Wait for Bat 2 Info
-            stop = true;
-          }else if(state.carOn === true){
-            //Match Rule #3
-            $("#rule3").addClass('active');
-            $("#i-solution").text("HOLD");
-            stop = true;
-          }
-        }
-
-        if(!stop){
-          $("#i-3bat").removeClass('invisible');
-          if(state.bat3FRK === undefined){
-            // Wait for Bat 2 Info
-            stop = true;
-
-            // Shortcut for 4 and 7 if 6 is false
-            if(state.color !== "red" || state.text !== "Hold"){
-              $("#rule4").addClass('active');
-              $("#rule7").addClass('active');
-              $("#i-solution").text("PRESS");
-            }
-          }else if(state.bat3FRK === true){
-            //Match Rule #4
-            $("#rule4").addClass('active');
-            $("#i-solution").text("PRESS");
-            stop = true;
-          }
-        }
-
-        // 5 not Needed
-
-        if(!stop && state.color == "red" && state.text == "Hold"){
-          //Match Rule #6
-          $("#rule6").addClass('active');
-          $("#i-solution").text("PRESS");
-          stop = true;
-        }
-
-        if(!stop){
-          //Match Rule #6
-          $("#rule7").addClass('active');
-          $("#i-solution").text("PRESS");
-          stop = true;
-        }
-      }
-
-      function interactive(){
-        // Reset Button
-        $("#i-reset").addClass('action');
-        $("#i-reset").bind('click', function(){
-          resetInteractive();
-          return false;
-        }.bind(this));
-
-        // Color Pick
-        $("#i-color li").addClass('action');
-        $("#i-color li").bind('click', function(){
-          $("#i-color li").removeClass('i-selected');
-          $(this).addClass('i-selected');
-          state.color = $(this)[0].innerHTML;
-          resetAdditional();
-          applySelection();
-        });
-
-        // Text Pick
-        $("#i-text li").addClass('action');
-        $("#i-text li").bind('click', function(){
-          $("#i-text li").removeClass('i-selected');
-          $(this).addClass('i-selected');
-          state.text = $(this)[0].innerHTML;
-          resetAdditional();
-          applySelection();
-        });
-
-        // 2 Batteries Info
-        $("#i-2bat span").addClass('action');
-        $("#i-2bat span").bind('click', function(){
-          $("#i-2bat span").removeClass('i-selected');
-          $(this).addClass('i-selected');
-          state.bat2 = $(this)[0].innerHTML == "YES";
-          applySelection();
-        });
-
-        // 3 Batteries Info
-        $("#i-3bat span").addClass('action');
-        $("#i-3bat span").bind('click', function(){
-          $("#i-3bat span").removeClass('i-selected');
-          $(this).addClass('i-selected');
-          state.bat3FRK = $(this)[0].innerHTML == "YES";
-          applySelection();
-        });
-
-        // 2 Batteries Info
-        $("#i-car span").addClass('action');
-        $("#i-car span").bind('click', function(){
-          $("#i-car span").removeClass('i-selected');
-          $(this).addClass('i-selected');
-          state.carOn = $(this)[0].innerHTML == "YES";
-          applySelection();
-        });
-
-        resetInteractive();
-      }
-
       $(function() {
         setup();
         cleanup();
-        interactive();
       });
     </script>
   <body>
