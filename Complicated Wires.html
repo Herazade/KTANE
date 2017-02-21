@@ -14,10 +14,90 @@
 		<meta name="viewport" content="initial-scale=1">
 		<link rel="stylesheet" type="text/css" href="css/normalize.css">
 		<link rel="stylesheet" type="text/css" href="css/main.css">
-		<script src='js/highlighter.js'></script>
 		<link href='https://fonts.googleapis.com/css?family=Special+Elite' rel='stylesheet' type='text/css'>
-		<link rel="icon" href="favicon.ico" type="image/png">
-		<link rel="apple-touch-icon-precomposed" href="apple-touch-icon-precomposed.png"> </head>
+		<link rel="apple-touch-icon-precomposed" href="apple-touch-icon-precomposed.png">
+		<style>
+			.cut{
+				background-color: rgba(139, 195, 74, 0.4);
+			}
+			.dontcut{
+				background-color: rgba(244, 67, 54, 0.4);
+			}
+			.notice{
+				font-size: .8em;
+			}
+			.notePadLink{
+				position: absolute;
+				top: 260px;
+    		margin-left: 570px;
+				text-decoration: underline;
+				cursor: pointer;
+				color: blue;
+			}
+			.notePad{
+				background-color: #f9f0a1;
+				box-shadow: 3px 4px 10px 2px #656565;
+				left: 9px;
+		    top: -727px;
+		    width: 300px;
+		    height: 300px;
+		    margin-left: 600px;
+			}
+			.closePad{
+				float: right;
+    		cursor: pointer;
+    		margin: 5px;
+			}
+		</style>
+		<script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+		<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script type="text/javascript">
+			$(function() {
+				// Setup
+				var instructions = $("#venntable tr");
+
+				// Add colors and toggle
+				$(instructions[1]).addClass('cut');
+				$(instructions[2]).addClass('dontcut');
+				$(instructions[3]).addClass('dontcut toggle');
+				$(instructions[4]).addClass('dontcut toggle');
+				$(instructions[5]).addClass('dontcut toggle');
+				$("#venntable").parent().append('<span class="notice">Click on the S P B lines to toggle them red/green</span>');
+				$("#venntable tr.toggle").css('cursor','pointer');
+				$("#venntable tr.toggle").bind('click', function(){
+					var line = $(this);
+					if(line.hasClass('cut')){
+						line.removeClass('cut');
+						line.addClass('dontcut');
+					}else{
+						line.removeClass('dontcut');
+						line.addClass('cut');
+					}
+				})
+
+				function generateNotePad(){
+						var notePad = $('<div class="notePad"></div>');
+						var closeButton = $('<span class="closePad">x</span>');
+						closeButton.bind('click', function(){
+							$(this).parent().remove();
+						})
+						notePad.append(closeButton);
+						notePad.draggable();
+						$(".page-content").append(notePad);
+						return notePad;
+				}
+
+				// Add notepad zone
+				var notePadLink = $('<span class="notePadLink" id="openNotePad">Add a sticky note</span>');
+				$(".page-content").append(notePadLink);
+				notePadLink.bind('click', function(){
+					generateNotePad();
+				})
+
+
+			});
+		</script>
+	</head>
 	<body>
 		<div id="ManualContent">
 			<div class="section">
